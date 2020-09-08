@@ -33,6 +33,7 @@ const repo = "https://artifactory.wgdp.io/wtp-helm"
 var (
 	version    string
 	namespace  string
+	chart      string
 	InstallCmd = &cobra.Command{
 		Use: "install",
 		//PreRun: Valid,
@@ -51,7 +52,9 @@ func Valid(cmd *cobra.Command, args []string) {
 func init() {
 	InstallCmd.PersistentFlags().StringVarP(&version, "version", "v", "", "version for installation")
 	InstallCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "set up namespace")
+	InstallCmd.PersistentFlags().StringVarP(&chart, "chart", "c", "", "chart name")
 	InstallCmd.Flags().StringP("values", "f", "", "the value file")
+
 	//InstallCmd.PersistentFlags().StringP("context", "c", "", "version for installation")
 	InstallCmd.Flags().Bool("dry-run", false, "It's boolean parameters bu default is false it performs without deployment, only a trial run")
 }
@@ -65,11 +68,11 @@ func RunInstall(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	statusHelmChart, err := helm.Status(actionConfig, "nps-dptool")
+	statusHelmChart, err := helm.NewStatus(actionConfig, chart)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
 	}
-
-	log.WithTime(time.Now()).Debug("To check if chart exists: " + "** " + statusHelmChart + " **")
+	infoStatusResult, err := statusHelmChart.InfoStatus()
+	log.WithTime(time.Now()).Debug("To check if chart exists: " + "** " + infoStatusResult + " **")
 }
