@@ -1,10 +1,9 @@
 package helm
 
 import (
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/action"
-	"os"
+	"helm.sh/helm/v3/pkg/release"
 	"time"
 )
 
@@ -15,7 +14,7 @@ type Status struct {
 
 func NewStatus(cfg *action.Configuration, chr string) (*Status, error) {
 	client := action.NewStatus(cfg)
-	log.WithTime(time.Now()).Debug("To check if chart exists: " + "** " + chr + " **")
+	log.WithTime(time.Now()).Debug("We use chart name for deployment: " + "** " + chr + " **")
 	return &Status{
 		statusClient: client,
 		chart:        chr,
@@ -23,12 +22,7 @@ func NewStatus(cfg *action.Configuration, chr string) (*Status, error) {
 
 }
 
-func (status *Status) InfoStatus() (string, error) {
+func (status *Status) InfoStatus() (*release.Release, error) {
 	results, err := status.statusClient.Run(status.chart)
-	if err != nil {
-		log.Printf("%+v", err)
-		os.Exit(1)
-	}
-	var res = fmt.Sprintf("%s", results.Info.Status)
-	return res, nil
+	return results, err
 }

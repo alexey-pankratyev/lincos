@@ -34,5 +34,5 @@ var (
 func init() {
 	rootCmd.AddCommand(helmCmd)
 
-	helmCmd.AddCommand(helm.InstallCmd)
+	helmCmd.AddCommand(helm.DeployCmd)
 }

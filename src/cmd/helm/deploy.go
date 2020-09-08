@@ -17,6 +17,7 @@ limitations under the License.
 package helm
 
 import (
+	"fmt"
 	_ "fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -31,14 +32,14 @@ import (
 const repo = "https://artifactory.wgdp.io/wtp-helm"
 
 var (
-	version    string
-	namespace  string
-	chart      string
-	InstallCmd = &cobra.Command{
-		Use: "install",
+	version   string
+	namespace string
+	chart     string
+	DeployCmd = &cobra.Command{
+		Use: "deploy",
 		//PreRun: Valid,
-		Short: "Run install of helm commands",
-		Run:   RunInstall,
+		Short: "Run Deploy of helm commands",
+		Run:   RunDeploy,
 	}
 )
 
@@ -50,16 +51,18 @@ func Valid(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	InstallCmd.PersistentFlags().StringVarP(&version, "version", "v", "", "version for installation")
-	InstallCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "set up namespace")
-	InstallCmd.PersistentFlags().StringVarP(&chart, "chart", "c", "", "chart name")
-	InstallCmd.Flags().StringP("values", "f", "", "the value file")
 
-	//InstallCmd.PersistentFlags().StringP("context", "c", "", "version for installation")
-	InstallCmd.Flags().Bool("dry-run", false, "It's boolean parameters bu default is false it performs without deployment, only a trial run")
+	DeployCmd.PersistentFlags().StringVarP(&version, "version", "v", "", "version for installation")
+	DeployCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "set up namespace")
+	DeployCmd.PersistentFlags().StringVarP(&chart, "chart", "c", "", "chart name")
+	DeployCmd.Flags().StringP("values", "f", "", "the value file")
+
+	//DeployCmd.PersistentFlags().StringP("context", "c", "", "version for installation")
+	DeployCmd.Flags().Bool("dry-run", false, "It's boolean parameters bu default is false it performs without deployment, only a trial run")
+
 }
 
-func RunInstall(cmd *cobra.Command, args []string) {
+func RunDeploy(cmd *cobra.Command, args []string) {
 
 	settings := cli.New()
 	actionConfig := new(action.Configuration)
@@ -73,6 +76,18 @@ func RunInstall(cmd *cobra.Command, args []string) {
 		log.Error(err)
 		os.Exit(1)
 	}
+
 	infoStatusResult, err := statusHelmChart.InfoStatus()
-	log.WithTime(time.Now()).Debug("To check if chart exists: " + "** " + infoStatusResult + " **")
+
+	if infoStatusResult == nil {
+		log.WithTime(time.Now()).WithFields(log.Fields{
+			"chart":  chart,
+			"status": infoStatusResult,
+			"Error":  err,
+		}).Info("Chart isn't deployed we will install now.")
+
+	}
+
+	log.WithTime(time.Now()).Debug("To check if chart exists: " + "** " + fmt.Sprintf("%+v", infoStatusResult.Info.Status) + " **")
+
 }
