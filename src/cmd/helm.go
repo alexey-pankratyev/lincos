@@ -17,22 +17,39 @@ package cmd
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"lincos/cmd/helm"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 var (
-	helmCmd = &cobra.Command{
+	settings = cli.New()
+)
+
+func newHelmInitCmd() *cobra.Command {
+
+	cmd := &cobra.Command{
 		Use:   "helm",
 		Short: "Run helm commands",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("helm (install|config)")
 		},
 	}
-)
+	cmd.AddCommand(newDeployCmd())
+	return cmd
+
+}
 
 func init() {
-	rootCmd.AddCommand(helmCmd)
+	newHelmInitCmd()
 
-	helmCmd.AddCommand(helm.DeployCmd)
+	rootCmd.AddCommand(newHelmInitCmd())
+}
+
+// Setting up logger
+func setLogger() {
+	log.SetLevel(log.InfoLevel)
+	if settings.Debug {
+		log.SetLevel(log.DebugLevel)
+	}
 }

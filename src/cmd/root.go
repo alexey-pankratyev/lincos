@@ -34,7 +34,6 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var (
-	debug bool
 	//config string
 
 	//role   string
@@ -49,15 +48,6 @@ var (
 	}
 )
 
-// Setting up logger
-func setLogger() {
-	log.SetLevel(log.InfoLevel)
-	if debug {
-		log.SetLevel(log.DebugLevel)
-	}
-
-}
-
 // Main executor
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -67,9 +57,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(setLogger)
-
-	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "Debug")
+	cobra.OnInitialize()
 
 	//rootCmd.PersistentFlags().StringVar(&config, "config", "", "config file (default is $HOME/.lincos.yaml)")
 
