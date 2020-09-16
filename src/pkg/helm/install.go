@@ -22,36 +22,57 @@ import (
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/cli/values"
+	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/release"
 	"time"
 )
 
-type Instal struct {
-	instalClient *action.Install
-	releaseName  string
-}
-
-func NewInstall(cfg *action.Configuration, releaseName string, set *cli.EnvSettings) (*Instal, error) {
-	client := action.NewInstall(cfg)
-	log.WithTime(time.Now()).Debug("We use chart name for deployment: " + "** " + releaseName + "\nsettings: " + fmt.Sprintf("%+v", set) + " **")
-	return &Instal{
-		instalClient: client,
-		releaseName:  releaseName,
-	}, nil
+type Install struct {
+	installClient *action.Install
+	releaseName   string
 }
 
 //runInstall
-func (instal *Instal) RunInstall() (*release.Release, error) {
-	instal.instalClient.ReleaseName = instal.releaseName
-	instal.instalClient.Namespace = "dataplatform"
+func RunInstall(
+	client *action.Install,
+	cfg *action.Configuration,
+	releaseName string,
+	chart string,
+	set *cli.EnvSettings,
+	valueOpts *values.Options,
+) (*release.Release, error) {
+	debug(set, "We use chart name for deployment: %s", releaseName)
+	client.ReleaseName = releaseName
+	client.Namespace = set.Namespace()
+	debug(set, "RunInstall Namespace:", client.Namespace)
 
-	chartPath := "/tmp/traefik-1.87.2.tgz"
-	chart, err := loader.Load(chartPath)
+	cp, err := client.ChartPathOptions.LocateChart(chart, set)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	log.WithTime(time.Now()).Debug("after load chart")
-	res, error := instal.instalClient.Run(chart, nil)
-	log.WithTime(time.Now()).Info(fmt.Sprintf("Successfully installed release: %+v ", res.Name))
-	return res, error
+
+	debug(set, "CHART PATH:", cp)
+
+	p := getter.All(set)
+	vals, err := valueOpts.MergeValues(p)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check chart dependencies to make sure all are present in /charts
+	chartRequested, err := loader.Load(cp)
+	if err != nil {
+		return nil, err
+	}
+	return client.Run(chartRequested, vals)
+
+}
+
+// Debug function
+func debug(settings *cli.EnvSettings, format string, v ...interface{}) {
+	if settings.Debug {
+		format = fmt.Sprintf("[debug] %s\n", format)
+		log.WithTime(time.Now()).Debug(2, fmt.Sprintf(format, v...))
+	}
 }

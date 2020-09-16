@@ -19,7 +19,9 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
+	"time"
 )
 
 var (
@@ -35,14 +37,21 @@ func newHelmInitCmd() *cobra.Command {
 			fmt.Println("helm (install|config)")
 		},
 	}
-	cmd.AddCommand(newDeployCmd())
+
+	flags := cmd.PersistentFlags()
+
+	settings.AddFlags(flags)
+
+	actionConfig := new(action.Configuration)
+
+	cmd.AddCommand(newDeployCmd(actionConfig))
 	return cmd
 
 }
 
 func init() {
-	newHelmInitCmd()
 
+	newHelmInitCmd()
 	rootCmd.AddCommand(newHelmInitCmd())
 }
 
@@ -51,5 +60,13 @@ func setLogger() {
 	log.SetLevel(log.InfoLevel)
 	if settings.Debug {
 		log.SetLevel(log.DebugLevel)
+	}
+}
+
+// Debug function
+func debug(format string, v ...interface{}) {
+	if settings.Debug {
+		format = fmt.Sprintf("[debug] %s\n", format)
+		log.WithTime(time.Now()).Debug(2, fmt.Sprintf(format, v...))
 	}
 }
