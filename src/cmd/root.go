@@ -16,75 +16,47 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
+	"io"
 	"os"
-	"time"
-
-	//"path/filepath"
-	//"strings"
-
-	//homedir "github.com/mitchellh/go-homedir"
-	log "github.com/sirupsen/logrus"
-	//"github.com/spf13/viper"
-	//"path/filepath"
-	//"strings"
-	//"time"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var (
-	//config string
+type pluginError struct {
+	error
+	code int
+}
 
-	//role   string
-	//branch string
-	//
-	//paths         []string
-
-	rootCmd = &cobra.Command{
+func newRootCmd(out io.Writer, args []string) (*cobra.Command, error) {
+	cmd := &cobra.Command{
 		Use:     "lincos",
 		Version: "0.1",
 		Short:   "Run lincos job from command line.",
 	}
-)
+	// Add subcommands
+	cmd.AddCommand(
+		newHelmInitCmd(out),
+	)
+	return cmd, nil
+}
 
-// Main executor
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+
+	cmd, err := newRootCmd(os.Stdout, os.Args[1:])
+	if err != nil {
+		debug("%+v", err)
 		os.Exit(1)
 	}
+
+	cobra.OnInitialize(func() {
+	})
+
+	// Main executor
+	if err := cmd.Execute(); err != nil {
+		switch e := err.(type) {
+		case pluginError:
+			os.Exit(e.code)
+		default:
+			os.Exit(1)
+		}
+	}
 }
-
-func init() {
-	cobra.OnInitialize()
-
-	//rootCmd.PersistentFlags().StringVar(&config, "config", "", "config file (default is $HOME/.lincos.yaml)")
-
-	log.WithTime(time.Now()).Debug("End init")
-
-}
-
-//func initConfig() {
-//	viper.SetConfigType("yaml")
-//
-//	if config != "" {
-//		viper.SetConfigFile(config)
-//	} else {
-//		home, err := homedir.Dir()
-//		if err != nil {
-//			fmt.Println(err)
-//			os.Exit(1)
-//		}
-//
-//		viper.AddConfigPath(filepath.Join(home, ".config"))
-//		viper.SetConfigName(".lincos")
-//	}
-//
-//	if err := viper.ReadInConfig(); err == nil {
-//		//fmt.Println("Using config file:", viper.ConfigFileUsed())
-//	}
-//
-//	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-//	viper.AutomaticEnv()
-//}

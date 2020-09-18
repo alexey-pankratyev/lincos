@@ -21,6 +21,7 @@ import (
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/cli"
+	"io"
 	"time"
 )
 
@@ -28,7 +29,7 @@ var (
 	settings = cli.New()
 )
 
-func newHelmInitCmd() *cobra.Command {
+func newHelmInitCmd(out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "helm",
@@ -44,15 +45,9 @@ func newHelmInitCmd() *cobra.Command {
 
 	actionConfig := new(action.Configuration)
 
-	cmd.AddCommand(newDeployCmd(actionConfig))
+	cmd.AddCommand(newDeployCmd(actionConfig, out))
+	debug("RunDeploy: test2")
 	return cmd
-
-}
-
-func init() {
-
-	newHelmInitCmd()
-	rootCmd.AddCommand(newHelmInitCmd())
 }
 
 // Setting up logger

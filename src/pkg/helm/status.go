@@ -13,12 +13,11 @@ type Status struct {
 
 func NewStatus(cfg *action.Configuration, releaseName string, set *cli.EnvSettings) (*Status, error) {
 	client := action.NewStatus(cfg)
-	debug(set, "We use chart name for status: %s", releaseName)
+	debug(set, "We use releaseName: \"%s\" to find out status", releaseName)
 	return &Status{
 		statusClient: client,
 		releaseName:  releaseName,
 	}, nil
-
 }
 
 func (status *Status) InfoStatus() (*release.Release, error) {
