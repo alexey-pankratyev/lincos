@@ -1,4 +1,4 @@
-module lincos
+module github.com/lincos
 
 go 1.15
 

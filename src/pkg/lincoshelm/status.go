@@ -1,4 +1,4 @@
-package helm
+package lincoshelm
 
 import (
 	"helm.sh/helm/v3/pkg/action"

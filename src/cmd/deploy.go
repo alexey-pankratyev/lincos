@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/lincos/pkg/lincoshelm"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	_ "github.com/spf13/viper"
@@ -27,7 +28,6 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/release"
 	"io"
-	"lincos/pkg/helm"
 	"os"
 	"strings"
 	"time"
@@ -182,7 +182,7 @@ func RunDeploy(args []string, cfg *action.Configuration, client *action.Install,
 	}
 	debug("Chart name: \"%s\"", chart)
 
-	statusHelmChart, err := helm.NewStatus(cfg, name, settings)
+	statusHelmChart, err := lincoshelm.NewStatus(cfg, name, settings)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
@@ -198,7 +198,7 @@ func RunDeploy(args []string, cfg *action.Configuration, client *action.Install,
 			"KubeContext": settings.KubeContext,
 		}).Info("Chart isn't deployed we will install now.")
 
-		installHelmChart, err := helm.RunInstall(client, cfg, name, chart, settings, valueOpts, out)
+		installHelmChart, err := lincoshelm.RunInstall(client, cfg, name, chart, settings, valueOpts, out)
 		if err != nil {
 			log.Error(err)
 			os.Exit(1)
@@ -211,7 +211,7 @@ func RunDeploy(args []string, cfg *action.Configuration, client *action.Install,
 
 	debug("To check if chart exists: \"%+v\"", infoStatusResult.Info.Status)
 
-	upgradeHelmChart, err := helm.RunUpgrade(clientUpgrade, cfg, name, chart, settings, valueOpts, out)
+	upgradeHelmChart, err := lincoshelm.RunUpgrade(clientUpgrade, cfg, name, chart, settings, valueOpts, out)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
