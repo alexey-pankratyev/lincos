@@ -33,8 +33,6 @@ import (
 	"time"
 )
 
-const repo = "https://artifactory.wgdp.io/wtp-helm"
-
 var (
 	valueOpts = &values.Options{}
 )
