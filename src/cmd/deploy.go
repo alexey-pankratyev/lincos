@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/lincos/pkg/lincoshelm"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	_ "github.com/spf13/viper"
@@ -28,6 +27,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/release"
 	"io"
+	"lincos/pkg/lincoshelm"
 	"os"
 	"strings"
 	"time"

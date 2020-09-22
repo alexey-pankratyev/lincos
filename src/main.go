@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/lincos/cmd"
+import "lincos/cmd"
 
 func main() {
 	cmd.Execute()
