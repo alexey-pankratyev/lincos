@@ -85,6 +85,19 @@ func addChartPathOptionsFlags(f *pflag.FlagSet, c *action.ChartPathOptions) {
 	f.StringVar(&c.CaFile, "ca-file", "", "verify certificates of HTTPS-enabled servers using this CA bundle")
 }
 
+func addChartPathOptionsFlagsInstall(client *action.Install, clientUpgrade *action.Upgrade) {
+	client.Version = clientUpgrade.Version
+	client.RepoURL = clientUpgrade.RepoURL
+	client.Verify = clientUpgrade.Verify
+	client.Username = clientUpgrade.Username
+	client.Username = clientUpgrade.Username
+	client.Password = clientUpgrade.Password
+	client.CertFile = clientUpgrade.CertFile
+	client.KeyFile = clientUpgrade.KeyFile
+	client.InsecureSkipTLSverify = clientUpgrade.InsecureSkipTLSverify
+	client.CaFile = clientUpgrade.CaFile
+}
+
 // bindOutputFlag will add the output flag to the given command and bind the
 // value to the given format pointer
 func bindOutputFlag(cmd *cobra.Command, varRef *output.Format) {

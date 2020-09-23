@@ -20,7 +20,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	_ "github.com/spf13/viper"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli/output"
@@ -145,7 +144,7 @@ func newDeployCmd(cfg *action.Configuration, out io.Writer) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "deploy [release name] [chart path|chart name]",
 		//PreRun: Valid,
-		Args:  require.ExactArgs(2),
+		Args:  require.MinimumNArgs(1),
 		Short: "Run Deploy of helm commands",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			rel, err := RunDeploy(args, cfg, client, clientUpgrade, valueOpts, out)
@@ -171,7 +170,10 @@ func newDeployCmd(cfg *action.Configuration, out io.Writer) *cobra.Command {
 func RunDeploy(args []string, cfg *action.Configuration, client *action.Install, clientUpgrade *action.Upgrade, valueOpts *values.Options, out io.Writer) (*release.Release, error) {
 
 	setLogger()
-
+	//client.Version = clientUpgrade.Version
+	//client.RepoURL = clientUpgrade.RepoURL
+	addChartPathOptionsFlagsInstall(client, clientUpgrade)
+	debug("client.ChartPathOptions: \"%s\"", &client.ChartPathOptions)
 	if err := cfg.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
 		log.Printf("%+v", err)
 		os.Exit(1)
